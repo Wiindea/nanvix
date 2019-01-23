@@ -26,95 +26,123 @@
 
 /**
  * @brief Schedules a process to execution.
- * 
+ *
  * @param proc Process to be scheduled.
  */
-PUBLIC void sched(struct process *proc)
-{
-	proc->state = PROC_READY;
-	proc->counter = 0;
+PUBLIC void sched(struct process *proc) {
+  proc->state = PROC_READY;
+  proc->counter = 0;
 }
 
 /**
  * @brief Stops the current running process.
  */
-PUBLIC void stop(void)
-{
-	curr_proc->state = PROC_STOPPED;
-	sndsig(curr_proc->father, SIGCHLD);
-	yield();
+PUBLIC void stop(void) {
+  curr_proc->state = PROC_STOPPED;
+  sndsig(curr_proc->father, SIGCHLD);
+  yield();
 }
 
 /**
  * @brief Resumes a process.
- * 
+ *
  * @param proc Process to be resumed.
- * 
+ *
  * @note The process must stopped to be resumed.
  */
-PUBLIC void resume(struct process *proc)
-{	
-	/* Resume only if process has stopped. */
-	if (proc->state == PROC_STOPPED)
-		sched(proc);
+PUBLIC void resume(struct process *proc) {
+  /* Resume only if process has stopped. */
+  if (proc->state == PROC_STOPPED)
+    sched(proc);
 }
 
 /**
  * @brief Yields the processor.
  */
-PUBLIC void yield(void)
-{
-	struct process *p;    /* Working process.     */
-	struct process *next; /* Next process to run. */
+PUBLIC void yield(void) {
+  struct process *p;    /* Working process.     */
+  struct process *next; /* Next process to run. */
 
-	/* Re-schedule process for execution. */
-	if (curr_proc->state == PROC_RUNNING)
-		sched(curr_proc);
+  /* Re-schedule process for execution. */
+  if (curr_proc->state == PROC_RUNNING)
+    sched(curr_proc);
 
-	/* Remember this process. */
-	last_proc = curr_proc;
+  /* Remember this process. */
+  last_proc = curr_proc;
 
-	/* Check alarm. */
-	for (p = FIRST_PROC; p <= LAST_PROC; p++)
-	{
-		/* Skip invalid processes. */
-		if (!IS_VALID(p))
-			continue;
-		
-		/* Alarm has expired. */
-		if ((p->alarm) && (p->alarm < ticks))
-			p->alarm = 0, sndsig(p, SIGALRM);
-	}
+  /* Check alarm. */
+  for (p = FIRST_PROC; p <= LAST_PROC; p++) {
+    /* Skip invalid processes. */
+    if (!IS_VALID(p))
+      continue;
 
-	/* Choose a process to run next. */
-	next = IDLE;
-	for (p = FIRST_PROC; p <= LAST_PROC; p++)
-	{
-		/* Skip non-ready process. */
-		if (p->state != PROC_READY)
-			continue;
-		
-		/*
-		 * Process with higher
-		 * waiting time found.
-		 */
-		if (p->counter > next->counter)
-		{
-			next->counter++;
-			next = p;
-		}
-			
-		/*
-		 * Increment waiting
-		 * time of process.
-		 */
-		else
-			p->counter++;
-	}
-	
-	/* Switch to next process. */
-	next->priority = PRIO_USER;
-	next->state = PROC_RUNNING;
-	next->counter = PROC_QUANTUM;
-	switch_to(next);
+    /* Alarm has expired. */
+    if ((p->alarm) && (p->alarm < ticks))
+      p->alarm = 0, sndsig(p, SIGALRM);
+  }
+
+  /* Choose a process to run next. */
+  next = IDLE;
+  for (p = FIRST_PROC; p <= LAST_PROC; p++) {
+    /* Skip non-ready process. */
+    if (p->state != PROC_READY)
+      continue;
+
+    /*
+     * Process with higher
+     * priority found.
+     */
+    if (p->priority < next->priority) {
+      next->counter++;
+      next = p;
+
+    } else if (p->priority == next->priority) {
+
+      if (p->counter > next->counter) {
+        next->counter++;
+        next = p;
+
+      } else if (p->counter == next->counter) {
+
+        if (p->nice < next->nice) {
+          next->counter++;
+          next = p;
+
+        } else {
+          p->counter++;
+        }
+
+      } else {
+        p->counter++;
+      }
+
+    } else {
+      p->counter++;
+    }
+    //   /*
+    //    * Process with higher
+    //    * waiting time found.
+    //    */
+    //   if (p->counter > next->counter) {
+    //     next->counter++;
+    //     next = p;
+    //   }
+    //
+    //   /*
+    //    * Increment waiting
+    //    * time of process.
+    //    */
+    //   else
+    //     p->counter++;
+    // }
+    // else {
+    //   p->counter++;
+    // }
+  }
+
+  /* Switch to next process. */
+  next->priority = PRIO_USER;
+  next->state = PROC_RUNNING;
+  next->counter = PROC_QUANTUM;
+  switch_to(next);
 }
