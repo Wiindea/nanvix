@@ -30,7 +30,7 @@
  * @param proc Process to be scheduled.
  */
 PUBLIC void sched(struct process *proc) {
-  proc->state = PROC_READY;
+  proc->state = PROC_READY; // test
   proc->counter = 0;
 }
 
@@ -119,25 +119,6 @@ PUBLIC void yield(void) {
     } else {
       p->counter++;
     }
-    //   /*
-    //    * Process with higher
-    //    * waiting time found.
-    //    */
-    //   if (p->counter > next->counter) {
-    //     next->counter++;
-    //     next = p;
-    //   }
-    //
-    //   /*
-    //    * Increment waiting
-    //    * time of process.
-    //    */
-    //   else
-    //     p->counter++;
-    // }
-    // else {
-    //   p->counter++;
-    // }
   }
 
   /* Switch to next process. */
