@@ -33,7 +33,7 @@
 PUBLIC void sched(struct process *proc)
 {
 	proc->state = PROC_READY;
-	proc->counter = 0;
+	ntickets += proc->tickets;
 }
 
 /**
@@ -42,6 +42,8 @@ PUBLIC void sched(struct process *proc)
 PUBLIC void stop(void)
 {
 	curr_proc->state = PROC_STOPPED;
+	ntickets -= curr_proc->tickets;
+	curr_proc->tickets = 0;
 	sndsig(curr_proc->father, SIGCHLD);
 	yield();
 }
@@ -89,7 +91,7 @@ PUBLIC void yield(void)
 
 	/* Choose a process to run next. */
 	next = IDLE;
-	int random = krand();
+	int random = (int) (krand()* +1)%ntickets;
 	for (p = FIRST_PROC; p <= LAST_PROC; p++)
 	{
 		/* Skip non-ready process. */
