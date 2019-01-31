@@ -280,7 +280,7 @@ EXTERN struct process *curr_proc;
 EXTERN struct process *last_proc;
 EXTERN pid_t next_pid;
 EXTERN unsigned nprocs;
-EXTERN unsigned ntickets;
+EXTERN int ntickets;
 
 #endif /* _ASM_FILE */
 

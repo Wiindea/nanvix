@@ -69,7 +69,7 @@ PUBLIC unsigned nprocs = 0;
 /**
  * @brief Current number of tickets in the system.
  */
-PUBLIC unsigned ntickets = 0;
+PUBLIC int ntickets = 0;
 
 /**
  * @brief Initializes the process management system.
@@ -128,6 +128,7 @@ PUBLIC void pm_init(void)
 	IDLE->chain = NULL;
 
 	nprocs++;
+	ntickets += IDLE->tickets;
 
 	enable_interrupts();
 }

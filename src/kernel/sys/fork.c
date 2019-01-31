@@ -160,6 +160,7 @@ found:
 	curr_proc->nchildren++;
 
 	nprocs++;
+	ntickets += proc->tickets;
 
 	return (proc->pid);
 
